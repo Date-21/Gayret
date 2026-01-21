@@ -62,8 +62,8 @@ import {
   getWeeklyStatus,
   countActiveDaysInMonth
 } from './utils';
-import Confetti from './components/Confetti';
-import ProgressModal from './components/ProgressModal';
+import Confetti from './Confetti';
+import ProgressModal from './ProgressModal';
 
 // --- Icons Map ---
 const ICON_MAP: Record<string, any> = {
