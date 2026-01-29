@@ -50,20 +50,21 @@ import {
   CATEGORIES,
   Badge
 } from './types';
-import { 
-  formatDateKey, 
-  getDayName, 
-  calculateStreak, 
-  getWeeklyProgress, 
+import {
+  formatDateKey,
+  getDayName,
+  calculateStreak,
+  getWeeklyProgress,
   getRandomQuote,
   getCompletionPercentage,
   checkBadges,
   getGoals,
   getWeeklyStatus,
-  countActiveDaysInMonth
+  countActiveDaysInMonth,
+  getCumulativeTotals
 } from './utils';
-import Confetti from './components/Confetti';
-import ProgressModal from './components/ProgressModal';
+import Confetti from './Confetti';
+import ProgressModal from './ProgressModal';
 
 // --- Icons Map ---
 const ICON_MAP: Record<string, any> = {
@@ -604,6 +605,40 @@ const App: React.FC = () => {
                                  />
                              );
                         })}
+                    </div>
+                 </div>
+
+                 {/* Cumulative Totals */}
+                 <div className="bg-surface-light dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/10">
+                    <h3 className="font-bold text-slate-800 dark:text-white mb-4">Toplam İstatistikler</h3>
+                    <div className="space-y-3">
+                        {activeHabits.map(h => {
+                            const total = getCumulativeTotals(h, logs);
+                            const IconComp = ICON_MAP[h.icon] || ICON_MAP['target'];
+
+                            return (
+                                <div key={h.id} className="flex items-center justify-between p-3 bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-white/5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: h.color + '20', color: h.color }}>
+                                            <IconComp size={20} />
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold text-slate-800 dark:text-white text-sm">{h.title}</div>
+                                            <div className="text-xs text-slate-400">Tüm Zamanlar</div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-xl font-bold text-primary">{total.toLocaleString('tr-TR')}</div>
+                                        <div className="text-xs text-slate-500">{h.unit}</div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {activeHabits.length === 0 && (
+                            <div className="text-center py-8 text-slate-400">
+                                <p className="text-sm">Henüz alışkanlık eklenmemiş</p>
+                            </div>
+                        )}
                     </div>
                  </div>
             </div>

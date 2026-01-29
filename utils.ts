@@ -207,3 +207,10 @@ export const checkBadges = (habits: Habit[], logs: HabitLog[]): Badge[] => {
     unlocked: def.condition(habits, logs)
   }));
 };
+
+// Calculate cumulative totals for each habit (all-time)
+export const getCumulativeTotals = (habit: Habit, logs: HabitLog[]): number => {
+  return logs
+    .filter(log => log.hid === habit.id)
+    .reduce((sum, log) => sum + log.val, 0);
+};
