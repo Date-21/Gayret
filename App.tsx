@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { 
-  Home, 
-  BarChart2, 
-  Settings as SettingsIcon, 
-  Plus, 
-  List, 
-  Bell, 
-  Moon, 
+import {
+  Home,
+  BarChart2,
+  Settings as SettingsIcon,
+  Plus,
+  List,
+  Bell,
+  Moon,
   Sun,
   Trash2,
   Edit2,
@@ -29,7 +29,12 @@ import {
   RefreshCw,
   Archive,
   MoreVertical,
-  Lock
+  Lock,
+  BookOpen,
+  Droplets,
+  Sparkles,
+  Music,
+  ChevronDown
 } from 'lucide-react';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
@@ -37,17 +42,18 @@ import {
 } from 'recharts';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
-import { 
-  Habit, 
-  HabitLog, 
-  Notification, 
-  ViewState, 
-  Theme, 
-  COLORS, 
+import {
+  Habit,
+  HabitLog,
+  Notification,
+  ViewState,
+  Theme,
+  COLORS,
   ICONS,
   HabitUnit,
   HabitCategory,
   CATEGORIES,
+  CATEGORY_EMOJIS,
   Badge
 } from './types';
 import {
@@ -61,7 +67,8 @@ import {
   getGoals,
   getWeeklyStatus,
   countActiveDaysInMonth,
-  getCumulativeTotals
+  getCumulativeTotals,
+  getRandomNotificationMessage
 } from './utils';
 import Confetti from './Confetti';
 import ProgressModal from './ProgressModal';
@@ -71,7 +78,7 @@ const ICON_MAP: Record<string, any> = {
   target: CheckCircle,
   book: List,
   activity: TrendingUp,
-  droplet: Award, 
+  droplet: Award,
   moon: Moon,
   dumbbell: BarChart2,
   music: Bell,
@@ -81,16 +88,35 @@ const ICON_MAP: Record<string, any> = {
   briefcase: Briefcase,
   palette: Palette,
   zap: Zap,
-  education: GraduationCap
+  education: GraduationCap,
+  bookopen: BookOpen,
+  waterdrop: Droplets,
+  crescent: Moon,
+  musicnote: Music,
+  leaf: Sparkles
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Sağlık': 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
-  'Kariyer': 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
-  'Maneviyat': 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300',
-  'Sanat': 'bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300',
-  'Eğitim': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300',
-  'Diğer': 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300',
+  'Sağlık': 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
+  'Spor & Fitness': 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300',
+  'Beslenme': 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
+  'Su & Hidrasyon': 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300',
+  'Uyku': 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300',
+  'Meditasyon & Nefes': 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300',
+  'Okuma': 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
+  'Eğitim & Öğrenme': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300',
+  'Dil Öğrenme': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+  'Yazarlık & Günlük': 'bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300',
+  'İbadet & Maneviyat': 'bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300',
+  'Sosyal İlişkiler': 'bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300',
+  'Aile & Ev': 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300',
+  'Finans & Tasarruf': 'bg-lime-100 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300',
+  'Kariyer & İş': 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
+  'Yaratıcılık & Sanat': 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300',
+  'Müzik': 'bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300',
+  'Temizlik & Düzen': 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300',
+  'Dijital Detoks': 'bg-stone-100 text-stone-700 dark:bg-stone-500/20 dark:text-stone-300',
+  'Kişisel Bakım': 'bg-zinc-100 text-zinc-700 dark:bg-zinc-500/20 dark:text-zinc-300'
 };
 
 const App: React.FC = () => {
@@ -133,11 +159,13 @@ const App: React.FC = () => {
     desc: '',
     goal: 1,
     unit: 'sayfa',
-    category: 'Diğer',
+    category: 'Sağlık',
     days: [1, 2, 3, 4, 5],
     color: COLORS[0],
     icon: 'target'
   });
+
+  const [categoryOpen, setCategoryOpen] = useState(false);
 
   // --- Effects ---
   useEffect(() => {
@@ -162,7 +190,7 @@ const App: React.FC = () => {
     const currentBadges = checkBadges(habits, logs);
     currentBadges.forEach(b => {
         if (b.unlocked && !badges.find(old => old.id === b.id)?.unlocked) {
-            triggerNotification('achievement', 'Rozet Kazanıldı!', `${b.title} rozetini kazandın!`);
+            triggerNotification('achievement', '🏅 Rozet Kazanıldı!', getRandomNotificationMessage('badge_earned', { badge_name: b.title }));
         }
     });
     setBadges(currentBadges);
@@ -271,6 +299,8 @@ const App: React.FC = () => {
         active: true
       };
       setHabits(prev => [...prev, newHabit]);
+      // Trigger new habit notification
+      triggerNotification('system', '🎯 Yeni Alışkanlık', getRandomNotificationMessage('new_habit'));
     }
     setView(ViewState.DASHBOARD);
     setHabitToEdit(null);
@@ -991,20 +1021,40 @@ const App: React.FC = () => {
                 <label className="block text-sm font-medium text-slate-500 mb-2 flex items-center gap-2">
                     Kategori {habitToEdit && <Lock size={12} className="text-primary"/>}
                 </label>
-                <div className={`flex flex-wrap gap-2 ${habitToEdit ? 'opacity-50 pointer-events-none' : ''}`}>
-                    {CATEGORIES.map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => setFormData({...formData, category: cat})}
-                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                formData.category === cat 
-                                ? 'bg-primary text-white' 
-                                : 'bg-surface-light dark:bg-white/5 text-slate-500 border border-slate-200 dark:border-white/10'
-                            }`}
-                        >
-                            {cat}
-                        </button>
-                    ))}
+                <div className={`relative ${habitToEdit ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <button
+                        type="button"
+                        onClick={() => !habitToEdit && setCategoryOpen(!categoryOpen)}
+                        className="w-full p-4 rounded-xl bg-surface-light dark:bg-white/5 border border-slate-200 dark:border-white/10 text-left flex items-center justify-between hover:border-primary transition-colors"
+                    >
+                        <div className="flex items-center gap-2">
+                            <span className="text-2xl">{CATEGORY_EMOJIS[formData.category]}</span>
+                            <span className="text-slate-800 dark:text-white font-medium">{formData.category}</span>
+                        </div>
+                        <ChevronDown className={`text-slate-400 transition-transform ${categoryOpen ? 'rotate-180' : ''}`} size={20} />
+                    </button>
+                    {categoryOpen && !habitToEdit && (
+                        <div className="absolute z-10 w-full mt-2 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-white/10 shadow-xl max-h-[300px] overflow-y-auto">
+                            {CATEGORIES.map(cat => (
+                                <button
+                                    key={cat}
+                                    type="button"
+                                    onClick={() => {
+                                        setFormData({...formData, category: cat});
+                                        setCategoryOpen(false);
+                                    }}
+                                    className={`w-full p-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors border-b border-slate-100 dark:border-white/5 last:border-0 ${
+                                        formData.category === cat ? 'bg-primary/10 border-l-4 border-l-primary' : ''
+                                    }`}
+                                >
+                                    <span className="text-2xl">{CATEGORY_EMOJIS[cat]}</span>
+                                    <span className={`text-sm font-medium ${formData.category === cat ? 'text-primary' : 'text-slate-700 dark:text-slate-300'}`}>
+                                        {cat}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
     
@@ -1118,15 +1168,16 @@ const App: React.FC = () => {
                     ))}
                 </div>
                  <div className="grid grid-cols-5 gap-2">
-                    {ICONS.slice(0,5).map(i => {
+                    {ICONS.slice(0,10).map(i => {
                         const IconComp = ICON_MAP[i] || ICON_MAP['target'];
                         return (
                             <button
                                 key={i}
+                                type="button"
                                 onClick={() => setFormData({...formData, icon: i})}
                                 className={`h-10 rounded-lg flex items-center justify-center transition-all ${
-                                    formData.icon === i 
-                                    ? 'bg-primary text-white' 
+                                    formData.icon === i
+                                    ? 'bg-primary text-white'
                                     : 'bg-surface-light dark:bg-white/5 text-slate-400 border border-slate-200 dark:border-white/10'
                                 }`}
                             >

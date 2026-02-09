@@ -1,6 +1,26 @@
 export type HabitUnit = 'sayfa' | 'dakika' | 'adet' | 'kez';
 
-export type HabitCategory = 'Sağlık' | 'Kariyer' | 'Maneviyat' | 'Sanat' | 'Eğitim' | 'Diğer';
+export type HabitCategory =
+  | 'Sağlık'
+  | 'Spor & Fitness'
+  | 'Beslenme'
+  | 'Su & Hidrasyon'
+  | 'Uyku'
+  | 'Meditasyon & Nefes'
+  | 'Okuma'
+  | 'Eğitim & Öğrenme'
+  | 'Dil Öğrenme'
+  | 'Yazarlık & Günlük'
+  | 'İbadet & Maneviyat'
+  | 'Sosyal İlişkiler'
+  | 'Aile & Ev'
+  | 'Finans & Tasarruf'
+  | 'Kariyer & İş'
+  | 'Yaratıcılık & Sanat'
+  | 'Müzik'
+  | 'Temizlik & Düzen'
+  | 'Dijital Detoks'
+  | 'Kişisel Bakım';
 
 export interface Habit {
   id: string;
@@ -58,5 +78,49 @@ export enum ViewState {
 export type Theme = 'dark' | 'light';
 
 export const COLORS = ['#f97316', '#fbbf24', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#64748b'];
-export const ICONS = ['target', 'book', 'activity', 'droplet', 'moon', 'dumbbell', 'music', 'heart', 'brain', 'coffee', 'briefcase', 'palette', 'zap'];
-export const CATEGORIES: HabitCategory[] = ['Sağlık', 'Kariyer', 'Maneviyat', 'Sanat', 'Eğitim', 'Diğer'];
+export const ICONS = ['target', 'book', 'activity', 'droplet', 'moon', 'dumbbell', 'music', 'heart', 'brain', 'coffee', 'briefcase', 'palette', 'zap', 'bookopen', 'waterdrop', 'crescent', 'musicnote', 'leaf'];
+export const CATEGORIES: HabitCategory[] = [
+  'Sağlık',
+  'Spor & Fitness',
+  'Beslenme',
+  'Su & Hidrasyon',
+  'Uyku',
+  'Meditasyon & Nefes',
+  'Okuma',
+  'Eğitim & Öğrenme',
+  'Dil Öğrenme',
+  'Yazarlık & Günlük',
+  'İbadet & Maneviyat',
+  'Sosyal İlişkiler',
+  'Aile & Ev',
+  'Finans & Tasarruf',
+  'Kariyer & İş',
+  'Yaratıcılık & Sanat',
+  'Müzik',
+  'Temizlik & Düzen',
+  'Dijital Detoks',
+  'Kişisel Bakım'
+];
+
+export const CATEGORY_EMOJIS: Record<HabitCategory, string> = {
+  'Sağlık': '💊',
+  'Spor & Fitness': '💪',
+  'Beslenme': '🥗',
+  'Su & Hidrasyon': '💧',
+  'Uyku': '😴',
+  'Meditasyon & Nefes': '🧘',
+  'Okuma': '📖',
+  'Eğitim & Öğrenme': '🎓',
+  'Dil Öğrenme': '🌍',
+  'Yazarlık & Günlük': '✍️',
+  'İbadet & Maneviyat': '🤲',
+  'Sosyal İlişkiler': '👥',
+  'Aile & Ev': '🏠',
+  'Finans & Tasarruf': '💰',
+  'Kariyer & İş': '💼',
+  'Yaratıcılık & Sanat': '🎨',
+  'Müzik': '🎵',
+  'Temizlik & Düzen': '🧹',
+  'Dijital Detoks': '📵',
+  'Kişisel Bakım': '✨'
+};
